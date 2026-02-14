@@ -1,0 +1,5 @@
+[console_scripts]
+WEBS = webscout.cli:main
+webscout = webscout.cli:main
+webscout-serve = webscout.server.server:main
+webscout-server = webscout.server.server:main

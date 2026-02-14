@@ -42,9 +42,11 @@ def generate(
         str: The generated text based on the provided prompt and model.
     """
 
-    api_url = f"https://api-inference.huggingface.co/models/{model}"
-    headers = {"Authorization": f"Bearer {os.environ.get('HUGGING_FACE_READ')}"}
-    client = InferenceClient(api_url, headers=headers)
+    # Use new HuggingFace router endpoint
+    client = InferenceClient(
+        model=model,
+        token=os.environ.get('HUGGING_FACE_READ')
+    )
 
     if chat_template == "mistral":
         formatted_prompt = f"[INST] {system_prompt} [/INST][INST] {prompt} [/INST]"

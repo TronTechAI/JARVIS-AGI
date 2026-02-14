@@ -1,0 +1,8 @@
+1
+00:00:00,100 --> 00:00:03,500
+Affirmative, I can communicate effectively.
+
+2
+00:00:03,450 --> 00:00:05,937
+What assistance do you require?
+

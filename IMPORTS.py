@@ -42,7 +42,7 @@ from PLAYGROUND.CAMERA import camera_vision
 from PROMPTS import INSTRUCTIONS, BISECTORS
 
 from TOOLS import Alpaca_DS_Converser, RawDog
-from TOOLS.SYSTEM_SETTINGS import system_theme, taskbar
+# from TOOLS.SYSTEM_SETTINGS import system_theme, taskbar  # Windows-only
 
 """----------------------------------------------------------------------------------------------INITIALIZATION-------------------------------------------------------------------"""
 

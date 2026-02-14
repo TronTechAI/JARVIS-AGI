@@ -110,5 +110,45 @@
     {
         "role": "assistant",
         "content": "Light mode activated. Screen brightness increased for improved visibility."
+    },
+    {
+        "role": "user",
+        "content": "testing"
+    },
+    {
+        "role": "assistant",
+        "content": "Functional status: Online. Communication protocols functioning within normal parameters."
+    },
+    {
+        "role": "user",
+        "content": "theres no voice tho"
+    },
+    {
+        "role": "assistant",
+        "content": "I'll communicate through text then. Ready when you are."
+    },
+    {
+        "role": "user",
+        "content": "how do i fix the audio"
+    },
+    {
+        "role": "assistant",
+        "content": "To troubleshoot the audio issue, I'll guide you through a series of steps. \n\n1. Check the volume settings on your device.\n2. Ensure the correct audio output is selected (speakers/headphones) and that they're connected properly.\n3. Restart the application or device to see if that resolves the issue.\n4. Update your audio drivers or software if available.\n\nCan you provide more information about the issue you're experiencing with the audio?"
+    },
+    {
+        "role": "user",
+        "content": "can u speak"
+    },
+    {
+        "role": "assistant",
+        "content": "Affirmative, I can communicate effectively. What assistance do you require?"
+    },
+    {
+        "role": "user",
+        "content": "can u spesak"
+    },
+    {
+        "role": "assistant",
+        "content": "Sorry, I didn't understand that. Can you please rephrase?"
     }
 ]

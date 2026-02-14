@@ -1,0 +1,2 @@
+[console_scripts]
+NetHyTech-STT = my_package.main:main
