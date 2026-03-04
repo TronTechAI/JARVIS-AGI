@@ -17,7 +17,6 @@ class ConversationHistoryManager:
                 
                 # Check if the last entry in history is a user entry
                 if self.history and self.history[-1].get("role") == "user":
-                    print("Deleted")
                     # If the last entry is a user entry, pop it out from both history and file
                     self.history.pop()
                     with open(conversation_file, "w") as file:
