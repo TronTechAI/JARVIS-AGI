@@ -1,5 +1,6 @@
 import json
 import os
+import tempfile
 
 class ConversationHistoryManager:
     def __init__(self, conversation_file="ASSETS/conversation_history.json", history_offset=400):
@@ -17,7 +18,6 @@ class ConversationHistoryManager:
                 
                 # Check if the last entry in history is a user entry
                 if self.history and self.history[-1].get("role") == "user":
-                    print("Deleted")
                     # If the last entry is a user entry, pop it out from both history and file
                     self.history.pop()
                     with open(conversation_file, "w") as file:
@@ -38,6 +38,44 @@ class ConversationHistoryManager:
     def store_history(self, history):
         self.history = history
         self.strip_history()
+
+    def record_turn(self, user_query, assistant_response):
+        """Commit a selected conversational turn before publishing its RAM view.
+
+        Action requests are deliberately not conversation turns. Keep the legacy
+        update_file API for callers that already store their pending user entry.
+        """
+        if not isinstance(user_query, str) or not isinstance(assistant_response, str):
+            raise TypeError("Conversation entries must be text")
+        turn = [{"role": "user", "content": user_query},
+                {"role": "assistant", "content": assistant_response}]
+        pending_history = self.history + turn
+        words = sum(len(entry["content"].split()) for entry in pending_history)
+        while words > self.history_offset and pending_history:
+            words -= len(pending_history.pop(0)["content"].split())
+
+        data = []
+        if os.path.exists(self.conversation_file) and os.path.getsize(self.conversation_file):
+            with open(self.conversation_file, "r") as file:
+                data = json.load(file)
+            if not isinstance(data, list):
+                raise ValueError("Conversation archive must be a list")
+
+        temporary_path = None
+        try:
+            directory = os.path.dirname(os.path.abspath(self.conversation_file))
+            with tempfile.NamedTemporaryFile(mode="w", dir=directory,
+                                             prefix=".conversation-", delete=False) as file:
+                temporary_path = file.name
+                json.dump(data + turn, file, indent=4)
+                file.flush()
+                os.fsync(file.fileno())
+            os.replace(temporary_path, self.conversation_file)
+        finally:
+            if temporary_path and os.path.exists(temporary_path):
+                os.unlink(temporary_path)
+
+        self.history = pending_history
 
     def update_file(self, user_query, assistant_response):
         conversation_json = [{"role": "user", "content": user_query}, {"role": "assistant", "content": assistant_response}]
