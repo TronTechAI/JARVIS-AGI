@@ -43,6 +43,14 @@
 
 from IMPORTS import *
 
+
+def save_conversation_turn(query, response):
+    try:
+        history_manager.record_turn(query, response)
+    except (OSError, ValueError, TypeError) as error:
+        print(f"Conversation history was not saved: {error}")
+
+
 while True:
 
     speech = listener.listen()
@@ -55,12 +63,15 @@ while True:
             speech = speech[:-6].strip()
         print("Updated Speech:", speech)
 
-        history_manager.store_history(history_manager.history + [{"role": "user", "content": speech}])
+        # Speculative generation must not commit action requests or mutate the
+        # conversation through the provider's request-building side effects.
+        request_history = [dict(entry) for entry in history_manager.history]
+        request_history.append({"role": "user", "content": speech})
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             response_img_or_text = executor.submit(deepInfra_TEXT.generate, [{"role": "user", "content": "Text to Classify -->" + speech}], system_prompt=BISECTORS.image_requests_v3)
             response_classifier = executor.submit(deepInfra_TEXT.generate, [{"role": "user", "content": "Text to Classify -->" + speech}], system_prompt=BISECTORS.complex_task_classifier_v6, stream=False)
-            default_response = executor.submit(deepInfra_TEXT.generate, history_manager.history, system_prompt=INSTRUCTIONS.human_response_v3_AVA, stream=False)
+            default_response = executor.submit(deepInfra_TEXT.generate, request_history, system_prompt=INSTRUCTIONS.human_response_v3_AVA, stream=False)
 
         print("Response Classifier >> ", "\033[91m" + response_classifier.result() + "\033[0m")
         print("Image or Text Classifier >> ", "\033[91m" + response_img_or_text.result() + "\033[0m")
@@ -77,7 +88,7 @@ while True:
         elif all(x in response_classifier.result().lower() for x in ("vision", "website", "call", "youtube")):
             print("\033[91mConfused with Classification. Using Default Response\033[0m")
             speak(default_response.result())
-            history_manager.update_file(speech, default_response.result())
+            save_conversation_turn(speech, default_response.result())
 
         elif "system control" in response_classifier.result().lower():
             with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -125,16 +136,14 @@ while True:
         else:
             print("AI>>", default_response.result())
             speak(default_response.result())
-            history_manager.update_file(speech, default_response.result())
+            save_conversation_turn(speech, default_response.result())
 
     else:
-        history_manager.store_history(history_manager.history + [{"role": "user", "content": speech}])
         print("\033[93mHuman >> {}\033[0m".format(speech))
 
         chat_response = Hugging_Face_TEXT.generate(speech)
         print("\n\033[92mJARVIS >> {}\033[0m\n".format(chat_response))
-        history_manager.update_file(speech, chat_response)
+        save_conversation_turn(speech, chat_response)
         speak(chat_response)
-
 
 
